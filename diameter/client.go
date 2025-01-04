@@ -5,13 +5,19 @@ type Client interface {
 	UpdateData(accountID string, sessionID string) error
 	TerminateData(accountID string, sessionID string) error
 
-	InitVideo(accountID string, sessionID string) error
-	UpdateVideo(accountID string, sessionID string) error
-	TerminateVideo(accountID string, sessionID string) error
+	InitVideoCalling(accountID string, sessionID string) error
+	UpdateVideoCalling(accountID string, sessionID string) error
+	TerminateVideoCalling(accountID string, sessionID string) error
+	InitVideoCalled(accountID string, sessionID string) error
+	UpdateVideoCalled(accountID string, sessionID string) error
+	TerminateVideoCalled(accountID string, sessionID string) error
 
-	InitVoice(accountID string, sessionID string) error
-	UpdateVoice(accountID string, sessionID string) error
-	TerminateVoice(accountID string, sessionID string) error
+	InitVoiceCalling(accountID string, sessionID string) error
+	UpdateVoiceCalling(accountID string, sessionID string) error
+	TerminateVoiceCalling(accountID string, sessionID string) error
+	InitVoiceCalled(accountID string, sessionID string) error
+	UpdateVoiceCalled(accountID string, sessionID string) error
+	TerminateVoiceCalled(accountID string, sessionID string) error
 }
 
 type DiameterClient struct {
