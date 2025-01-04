@@ -15,7 +15,7 @@ type Client interface {
 }
 
 type DiameterClient struct {
-	conn diam.Conn
+	//conn diam.Conn
 	//mux  *sm.StateMachine
 }
 
