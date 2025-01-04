@@ -14,7 +14,7 @@ import (
 var conn diam.Conn
 var client diameter.Client
 
-const batchSize = 100
+const batchSize = 1
 
 const updateIterations = 2
 const sleepTimes = 1 * time.Second
@@ -51,16 +51,23 @@ func Start(numberOfAccounts int) {
 		accountIDs = append(accountIDs, id)
 	}
 
-	pusherWg := new(sync.WaitGroup)
+	accountsMap := make(map[int][]string)
+
 	numOfWorkers := int(math.Ceil(float64(numberOfAccounts) / batchSize))
-	pusherWg.Add(numOfWorkers)
+
 	for i := 0; i < numOfWorkers; i++ {
 		start := i * batchSize
 		end := (i + 1) * batchSize
 		if end > numberOfAccounts {
 			end = numberOfAccounts
 		}
-		go pushWorker(tasks, accountIDs[start:end], pusherWg)
+		accountsMap[i] = accountIDs[start:end]
+	}
+
+	pusherWg := new(sync.WaitGroup)
+	pusherWg.Add(numOfWorkers)
+	for i := 0; i < numOfWorkers; i++ {
+		go pushWorker(tasks, accountsMap[i], pusherWg)
 	}
 
 	pusherWg.Wait()
