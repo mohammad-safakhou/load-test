@@ -59,6 +59,8 @@ func (m *account) Run() {
 			log.Errorf("init data err: %v", err)
 		}
 
+		//time.Sleep(10 * time.Second)
+
 		for i := 0; i < m.updateIteration; i++ {
 			time.Sleep(m.sleepTimes)
 			err = m.client.UpdateData(m.accountID, m.sessionData)

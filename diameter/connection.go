@@ -7,6 +7,7 @@ import (
 	"github.com/MHG14/go-diameter/v4/diam/datatype"
 	"github.com/MHG14/go-diameter/v4/diam/dict"
 	"github.com/MHG14/go-diameter/v4/diam/sm"
+	log "github.com/sirupsen/logrus"
 	"net"
 	"time"
 )
@@ -34,13 +35,19 @@ func NewConnection() (diam.Conn, error) {
 
 	// Create the state machine (it's a diam.ServeMux) and client.
 	mux := sm.New(cfg)
+
+	mux.Handle("CCA", handleCCA())
+
 	cli := &sm.Client{
 		Dict:               dict.Default,
 		Handler:            mux,
 		MaxRetransmits:     3,
 		RetransmitInterval: time.Second,
-		EnableWatchdog:     true,
+		EnableWatchdog:     false,
 		WatchdogInterval:   5 * time.Second,
+		WatchdogStream:     0,
+		SupportedVendorID:  nil,
+		AcctApplicationID:  nil,
 		//AcctApplicationID: []*diam.AVP{
 		//	// Advertise that we want support accounting application with id 999
 		//	diam.NewAVP(avp.AcctApplicationID, avp.Mbit, 0, datatype.Unsigned32(4)),
@@ -49,6 +56,7 @@ func NewConnection() (diam.Conn, error) {
 			// Advertise support for credit control application
 			diam.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4)), // RFC 4006
 		},
+		VendorSpecificApplicationID: nil,
 	}
 	return dial(cli, *addr, *certFile, *keyFile, *ssl, *networkType)
 }
@@ -58,4 +66,25 @@ func dial(cli *sm.Client, addr, cert, key string, ssl bool, networkType string) 
 		return cli.DialNetworkTLS(networkType, addr, cert, key, nil)
 	}
 	return cli.DialNetwork(networkType, addr)
+}
+
+type CCAMessage struct {
+	RequestType datatype.Unsigned32 `avp:"CC-Request-Type"`
+}
+
+var CCAs []string
+
+func handleCCA() diam.HandlerFunc {
+	return func(c diam.Conn, m *diam.Message) {
+		message := CCAMessage{}
+		err := m.Unmarshal(&message)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		//log.Printf("Received CCA from %s ------- %s", c.RemoteAddr(), message.RequestType.String())
+		if message.RequestType == datatype.Unsigned32(3) {
+			CCAs = append(CCAs, message.RequestType.String())
+		}
+	}
 }
