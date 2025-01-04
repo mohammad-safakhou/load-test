@@ -14,7 +14,17 @@ import (
 )
 
 type Client interface {
-	SendSNR(message service_models.SNRMessage) error
+	InitData(accountID string, sessionID string) error
+	UpdateData(accountID string, sessionID string) error
+	TerminateData(accountID string, sessionID string) error
+
+	InitVideo(accountID string, sessionID string) error
+	UpdateVideo(accountID string, sessionID string) error
+	TerminateVideo(accountID string, sessionID string) error
+
+	InitVoice(accountID string, sessionID string) error
+	UpdateVoice(accountID string, sessionID string) error
+	TerminateVoice(accountID string, sessionID string) error
 }
 
 type DiameterClient struct {
