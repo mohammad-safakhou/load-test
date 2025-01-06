@@ -10,7 +10,7 @@ import (
 
 func main() {
 	diameter.CCAs = []string{}
-	numberOfAccounts := 10000
+	numberOfAccounts := 1000000
 	monitoring.Init(numberOfAccounts)
 	engine.Start(numberOfAccounts)
 	for {

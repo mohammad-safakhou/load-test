@@ -24,7 +24,6 @@ func worker(task chan string, wg *sync.WaitGroup, numberOfAccounts int) {
 	for id := range task {
 		pipeline.NewAccount(updateIterations, numberOfAccounts, sleepTimes, client, id).Run()
 		fmt.Printf("%s is Done\n", id)
-		return
 	}
 }
 
