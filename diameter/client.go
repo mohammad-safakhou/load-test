@@ -26,19 +26,31 @@ type DiameterClient struct {
 
 func (d *DiameterClient) InitData(accountID string, sessionID string) error {
 	message := BuildDataInitSessionCCR(sessionID, accountID)
-	_, err := message.WriteTo(d.conn)
+	cnn, err := NewConnection()
+	if err != nil {
+		panic(err)
+	}
+	_, err = message.WriteTo(cnn)
 	return err
 }
 
 func (d *DiameterClient) UpdateData(accountID string, sessionID string) error {
 	message := BuildDataUpdateSessionCCR(sessionID, accountID)
-	_, err := message.WriteTo(d.conn)
+	cnn, err := NewConnection()
+	if err != nil {
+		panic(err)
+	}
+	_, err = message.WriteTo(cnn)
 	return err
 }
 
 func (d *DiameterClient) TerminateData(accountID string, sessionID string) error {
 	message := BuildDataTerminateSessionCCR(sessionID, accountID)
-	_, err := message.WriteTo(d.conn)
+	cnn, err := NewConnection()
+	if err != nil {
+		panic(err)
+	}
+	_, err = message.WriteTo(cnn)
 	return err
 }
 
