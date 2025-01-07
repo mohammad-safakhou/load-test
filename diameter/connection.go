@@ -1,7 +1,6 @@
 package diameter
 
 import (
-	"flag"
 	"github.com/MHG14/go-diameter/v4/diam"
 	"github.com/MHG14/go-diameter/v4/diam/avp"
 	"github.com/MHG14/go-diameter/v4/diam/datatype"
@@ -13,17 +12,17 @@ import (
 )
 
 func NewConnection() (diam.Conn, error) {
-	addr := flag.String("addr", "192.168.20.244:3868", "address in form of ip:port to connect to")
-	ssl := flag.Bool("ssl", false, "connect to server using tls")
-	host := flag.String("diam_host", "client", "diameter identity host")
-	realm := flag.String("diam_realm", "go-diameter", "diameter identity realm")
-	certFile := flag.String("cert_file", "", "tls client certificate file (optional)")
-	keyFile := flag.String("key_file", "", "tls client key file (optional)")
-	networkType := flag.String("network_type", "tcp", "protocol type tcp/sctp")
+	addr := "192.168.20.244:3868"
+	ssl := false
+	host := "client"
+	realm := "go-diameter"
+	certFile := ""
+	keyFile := ""
+	networkType := "tcp"
 
 	cfg := &sm.Settings{
-		OriginHost:       datatype.DiameterIdentity(*host),
-		OriginRealm:      datatype.DiameterIdentity(*realm),
+		OriginHost:       datatype.DiameterIdentity(host),
+		OriginRealm:      datatype.DiameterIdentity(realm),
 		VendorID:         0,
 		ProductName:      "go-diameter",
 		OriginStateID:    datatype.Unsigned32(time.Now().Unix()),
@@ -58,7 +57,7 @@ func NewConnection() (diam.Conn, error) {
 		},
 		VendorSpecificApplicationID: nil,
 	}
-	return dial(cli, *addr, *certFile, *keyFile, *ssl, *networkType)
+	return dial(cli, addr, certFile, keyFile, ssl, networkType)
 }
 
 func dial(cli *sm.Client, addr, cert, key string, ssl bool, networkType string) (diam.Conn, error) {
