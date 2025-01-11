@@ -32,6 +32,8 @@ func Start(numberOfAccounts int, timeout time.Duration) {
 	}
 	client := diameter.NewDiameterClient(conn, hopIDs, timeout)
 
+	numOfWorkers := int(math.Ceil(float64(numberOfAccounts) / batchSize))
+
 	tasks := make(chan models.AccountID, numberOfAccounts)
 	wg := new(sync.WaitGroup)
 	wg.Add(numberOfAccounts)
@@ -48,8 +50,6 @@ func Start(numberOfAccounts int, timeout time.Duration) {
 	}
 
 	accountsMap := make(map[int][]models.AccountID)
-
-	numOfWorkers := int(math.Ceil(float64(numberOfAccounts) / batchSize))
 
 	for i := 0; i < numOfWorkers; i++ {
 		start := i * batchSize

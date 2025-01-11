@@ -40,7 +40,11 @@ func (d *DiameterClient) Send(message *diam.Message, accountID models.AccountID)
 
 	d.hopIDs.Store(hopID, ch)
 
-	_, err := message.WriteTo(d.conn)
+	conn, err := NewConnection(d.hopIDs)
+	if err != nil {
+		panic(err)
+	}
+	_, err = message.WriteTo(conn)
 	if err != nil {
 		return err
 	}
