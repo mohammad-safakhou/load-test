@@ -43,7 +43,7 @@ func NewConnection(hopIDs *sync.Map) (diam.Conn, error) {
 		Handler:            mux,
 		MaxRetransmits:     3,
 		RetransmitInterval: time.Second,
-		EnableWatchdog:     true,
+		EnableWatchdog:     false,
 		WatchdogInterval:   5 * time.Second,
 		WatchdogStream:     0,
 		SupportedVendorID:  nil,
