@@ -19,7 +19,7 @@ func worker(task chan models.AccountID, wg *sync.WaitGroup, numberOfAccounts int
 	defer wg.Done()
 	for id := range task {
 		pipeline.NewAccount(updateIterations, numberOfAccounts, sleepTimes, client, id).Run()
-		fmt.Printf("%s is Done\n", id)
+		//fmt.Printf("%s is Done\n", id)
 	}
 }
 
