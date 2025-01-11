@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const batchSize = 10
+const batchSize = 1
 
 const updateIterations = 2
 const sleepTimes = 1 * time.Second

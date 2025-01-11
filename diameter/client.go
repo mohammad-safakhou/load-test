@@ -44,6 +44,7 @@ func (d *DiameterClient) Send(message *diam.Message, accountID models.AccountID)
 	if err != nil {
 		panic(err)
 	}
+	defer conn.Close()
 	_, err = message.WriteTo(conn)
 	if err != nil {
 		return err
