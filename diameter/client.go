@@ -108,9 +108,9 @@ func (d *DiameterClient) TerminateVoiceCalled(accountID0, accountID1 models.Acco
 	return d.Send(BuildVoiceCalledTerminateSessionCCR(sessionID, accountID0.String(), accountID1.String()), accountID0)
 }
 
-func NewDiameterClient(conn diam.Conn, hopIDs *sync.Map) Client {
+func NewDiameterClient(conn diam.Conn, hopIDs *sync.Map, timeout time.Duration) Client {
 	return &DiameterClient{
-		timeout: 5 * time.Second,
+		timeout: timeout,
 		conn:    conn,
 		hopIDs:  hopIDs,
 	}
