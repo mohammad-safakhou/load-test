@@ -2,8 +2,8 @@ package diameter
 
 import (
 	"errors"
+	"fmt"
 	"github.com/MHG14/go-diameter/v4/diam"
-	log "github.com/sirupsen/logrus"
 	"load-test/models"
 	"sync"
 	"time"
@@ -56,8 +56,7 @@ func (d *DiameterClient) Send(message *diam.Message, accountID models.AccountID)
 		return nil
 	case <-timeout:
 		d.hopIDs.Delete(hopID)
-		log.Errorf("Timeout happened on accountID: %s", accountID.String())
-		return errors.New("response timeout")
+		return errors.New(fmt.Sprintf("Timeout happened on accountID: %s", accountID.String()))
 	}
 }
 

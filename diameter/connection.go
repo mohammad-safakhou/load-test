@@ -94,7 +94,7 @@ func handleResponse(hopIds *sync.Map) diam.HandlerFunc {
 		hopByHopID := m.Header.HopByHopID
 		val, ok := hopIds.Load(hopByHopID)
 		if !ok {
-			log.Errorf("Received unexpected response with Hop-by-Hop ID %d\n", hopByHopID)
+			log.Errorf("Received unexpected response with Hop-by-Hop ID %d, with messsage: %s\n", hopByHopID, m.String())
 			return
 		}
 		ch := val.(chan *diam.Message)
