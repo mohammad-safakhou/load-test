@@ -2,7 +2,6 @@ package engine
 
 import (
 	"fmt"
-	"github.com/MHG14/go-diameter/v4/diam"
 	"load-test/diameter"
 	"load-test/models"
 	"load-test/pipeline"
@@ -11,15 +10,12 @@ import (
 	"time"
 )
 
-var conn diam.Conn
-var client diameter.Client
-
 const batchSize = 1
 
 const updateIterations = 2
 const sleepTimes = 1 * time.Second
 
-func worker(task chan models.AccountID, wg *sync.WaitGroup, numberOfAccounts int) {
+func worker(task chan models.AccountID, wg *sync.WaitGroup, numberOfAccounts int, client diameter.Client) {
 	defer wg.Done()
 	for id := range task {
 		pipeline.NewAccount(updateIterations, numberOfAccounts, sleepTimes, client, id).Run()
@@ -30,17 +26,17 @@ func worker(task chan models.AccountID, wg *sync.WaitGroup, numberOfAccounts int
 func Start(numberOfAccounts int, timeout time.Duration) {
 	var err error
 	hopIDs := new(sync.Map)
-	conn, err = diameter.NewConnection(hopIDs)
+	conn, err := diameter.NewConnection(hopIDs)
 	if err != nil {
 		panic(err)
 	}
-	client = diameter.NewDiameterClient(conn, hopIDs, timeout)
+	client := diameter.NewDiameterClient(conn, hopIDs, timeout)
 
 	tasks := make(chan models.AccountID, numberOfAccounts)
 	wg := new(sync.WaitGroup)
 	wg.Add(numberOfAccounts)
 	for i := 0; i < numberOfAccounts; i++ {
-		go worker(tasks, wg, numberOfAccounts)
+		go worker(tasks, wg, numberOfAccounts, client)
 	}
 
 	fmt.Println("Workers are all up and running")
