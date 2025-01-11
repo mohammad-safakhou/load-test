@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func NewConnection() (diam.Conn, error) {
+func NewConnection(hopIDs map[uint32]chan *diam.Message) (diam.Conn, error) {
 	addr := "192.168.20.244:3868"
 	ssl := false
 	host := "client"
@@ -35,7 +35,7 @@ func NewConnection() (diam.Conn, error) {
 	// Create the state machine (it's a diam.ServeMux) and client.
 	mux := sm.New(cfg)
 
-	mux.Handle("CCA", handleCCA())
+	mux.Handle("CCA", handleResponse(hopIDs))
 
 	cli := &sm.Client{
 		Dict:               dict.Default,
@@ -84,6 +84,18 @@ func handleCCA() diam.HandlerFunc {
 		//log.Printf("Received CCA from %s ------- %s", c.RemoteAddr(), message.RequestType.String())
 		if message.RequestType == datatype.Unsigned32(3) {
 			CCAs = append(CCAs, message.RequestType.String())
+		}
+	}
+}
+
+func handleResponse(hopIds map[uint32]chan *diam.Message) diam.HandlerFunc {
+	return func(_ diam.Conn, m *diam.Message) {
+		hopByHopID := m.Header.HopByHopID
+		v, exists := hopIds[hopByHopID]
+		if !exists {
+			log.Errorf("Received unexpected response with Hop-by-Hop ID %d\n", hopByHopID)
+		} else {
+			v <- m
 		}
 	}
 }

@@ -1,8 +1,11 @@
 package diameter
 
 import (
+	"errors"
 	"github.com/MHG14/go-diameter/v4/diam"
+	log "github.com/sirupsen/logrus"
 	"load-test/models"
+	"time"
 )
 
 type Client interface {
@@ -23,84 +26,89 @@ type Client interface {
 }
 
 type DiameterClient struct {
-	conn diam.Conn
+	timeout time.Duration
+	conn    diam.Conn
+
+	hopIDs map[uint32]chan *diam.Message
 	//mux  *sm.StateMachine
 }
 
-func (d *DiameterClient) InitData(accountID models.AccountID, sessionID string) error {
-	message := BuildDataInitSessionCCR(sessionID, accountID.String())
+func (d *DiameterClient) Send(message *diam.Message, accountID models.AccountID) error {
+	hopID := message.Header.HopByHopID
+	d.hopIDs[hopID] = make(chan *diam.Message)
+
 	_, err := message.WriteToStream(d.conn, uint(accountID.ID()))
-	return err
+	if err != nil {
+		return err
+	}
+
+	timeout := time.After(d.timeout)
+
+	// Wait for Response
+	select {
+	case resp := <-d.hopIDs[hopID]:
+		_ = resp
+		delete(d.hopIDs, hopID)
+
+		return nil
+	case <-timeout:
+		log.Errorf("Timeout happened on accountID: %s", accountID.String())
+		return errors.New("response timeout")
+	}
+}
+
+func (d *DiameterClient) InitData(accountID models.AccountID, sessionID string) error {
+	return d.Send(BuildDataInitSessionCCR(sessionID, accountID.String()), accountID)
 }
 
 func (d *DiameterClient) UpdateData(accountID models.AccountID, sessionID string) error {
-	message := BuildDataUpdateSessionCCR(sessionID, accountID.String())
-	_, err := message.WriteToStream(d.conn, uint(accountID.ID()))
-	return err
+	return d.Send(BuildDataUpdateSessionCCR(sessionID, accountID.String()), accountID)
 }
 
 func (d *DiameterClient) TerminateData(accountID models.AccountID, sessionID string) error {
-	message := BuildDataTerminateSessionCCR(sessionID, accountID.String())
-	_, err := message.WriteToStream(d.conn, uint(accountID.ID()))
-	return err
+	return d.Send(BuildDataTerminateSessionCCR(sessionID, accountID.String()), accountID)
 }
 
 func (d *DiameterClient) InitVideoCalling(accountID0, accountID1 models.AccountID, sessionID string) error {
-	message := BuildVideoCallingInitSessionCCR(sessionID, accountID0.String(), accountID1.String())
-	_, err := message.WriteToStream(d.conn, uint(accountID0.ID()))
-	return err
+	return d.Send(BuildVideoCallingInitSessionCCR(sessionID, accountID0.String(), accountID1.String()), accountID0)
 }
 
 func (d *DiameterClient) UpdateVideoCalling(accountID0, accountID1 models.AccountID, sessionID string) error {
-	message := BuildVideoCallingUpdateSessionCCR(sessionID, accountID0.String(), accountID1.String())
-	_, err := message.WriteToStream(d.conn, uint(accountID0.ID()))
-	return err
+	return d.Send(BuildVideoCallingUpdateSessionCCR(sessionID, accountID0.String(), accountID1.String()), accountID0)
 }
 
 func (d *DiameterClient) TerminateVideoCalling(accountID0, accountID1 models.AccountID, sessionID string) error {
-	message := BuildVideoCallingTerminateSessionCCR(sessionID, accountID0.String(), accountID1.String())
-	_, err := message.WriteToStream(d.conn, uint(accountID0.ID()))
-	return err
+	return d.Send(BuildVideoCallingTerminateSessionCCR(sessionID, accountID0.String(), accountID1.String()), accountID0)
 }
 
 func (d *DiameterClient) InitVoiceCalling(accountID0, accountID1 models.AccountID, sessionID string) error {
-	message := BuildVoiceCallingInitSessionCCR(sessionID, accountID0.String(), accountID1.String())
-	_, err := message.WriteToStream(d.conn, uint(accountID0.ID()))
-	return err
+	return d.Send(BuildVoiceCallingInitSessionCCR(sessionID, accountID0.String(), accountID1.String()), accountID0)
 }
 
 func (d *DiameterClient) UpdateVoiceCalling(accountID0, accountID1 models.AccountID, sessionID string) error {
-	message := BuildVoiceCallingUpdateSessionCCR(sessionID, accountID0.String(), accountID1.String())
-	_, err := message.WriteToStream(d.conn, uint(accountID0.ID()))
-	return err
+	return d.Send(BuildVoiceCallingUpdateSessionCCR(sessionID, accountID0.String(), accountID1.String()), accountID0)
 }
 
 func (d *DiameterClient) TerminateVoiceCalling(accountID0, accountID1 models.AccountID, sessionID string) error {
-	message := BuildVoiceCallingTerminateSessionCCR(sessionID, accountID0.String(), accountID1.String())
-	_, err := message.WriteToStream(d.conn, uint(accountID0.ID()))
-	return err
+	return d.Send(BuildVoiceCallingTerminateSessionCCR(sessionID, accountID0.String(), accountID1.String()), accountID0)
 }
 
 func (d *DiameterClient) InitVoiceCalled(accountID0, accountID1 models.AccountID, sessionID string) error {
-	message := BuildVoiceCalledInitSessionCCR(sessionID, accountID0.String(), accountID1.String())
-	_, err := message.WriteToStream(d.conn, uint(accountID0.ID()))
-	return err
+	return d.Send(BuildVoiceCalledInitSessionCCR(sessionID, accountID0.String(), accountID1.String()), accountID0)
 }
 
 func (d *DiameterClient) UpdateVoiceCalled(accountID0, accountID1 models.AccountID, sessionID string) error {
-	message := BuildVoiceCalledUpdateSessionCCR(sessionID, accountID0.String(), accountID1.String())
-	_, err := message.WriteToStream(d.conn, uint(accountID0.ID()))
-	return err
+	return d.Send(BuildVoiceCalledUpdateSessionCCR(sessionID, accountID0.String(), accountID1.String()), accountID0)
 }
 
 func (d *DiameterClient) TerminateVoiceCalled(accountID0, accountID1 models.AccountID, sessionID string) error {
-	message := BuildVoiceCalledTerminateSessionCCR(sessionID, accountID0.String(), accountID1.String())
-	_, err := message.WriteToStream(d.conn, uint(accountID0.ID()))
-	return err
+	return d.Send(BuildVoiceCalledTerminateSessionCCR(sessionID, accountID0.String(), accountID1.String()), accountID0)
 }
 
-func NewDiameterClient(conn diam.Conn) Client {
+func NewDiameterClient(conn diam.Conn, hopIDs map[uint32]chan *diam.Message) Client {
 	return &DiameterClient{
-		conn: conn,
+		timeout: 5 * time.Second,
+		conn:    conn,
+		hopIDs:  hopIDs,
 	}
 }
