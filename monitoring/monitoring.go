@@ -29,11 +29,16 @@ const (
 
 var Monitoring chan State
 
-func Init(numberOfAccounts int) {
+func Init(numberOfAccounts int) func() {
 	Monitoring = make(chan State, numberOfAccounts)
 	for i := 0; i < 10; i++ {
 		go monitoringWorker()
 	}
+	return closer
+}
+
+func closer() {
+	close(Monitoring)
 }
 
 func monitoringWorker() {
