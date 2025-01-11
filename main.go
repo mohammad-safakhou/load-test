@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"load-test/diameter"
 	"load-test/engine"
@@ -10,12 +11,12 @@ import (
 
 func main() {
 	diameter.CCAs = []string{}
-	numberOfAccounts := 1000000
-	monitoring.Init(numberOfAccounts)
-	engine.Start(numberOfAccounts)
+	numberOfAccounts := flag.Int("num", 1000000, "Number of accounts to create")
+	monitoring.Init(*numberOfAccounts)
+	engine.Start(*numberOfAccounts)
 	for {
 		time.Sleep(1 * time.Second)
-		if len(diameter.CCAs) == numberOfAccounts {
+		if len(diameter.CCAs) == *numberOfAccounts {
 			break
 		} else {
 			fmt.Printf("%d CCA(s) fetched.\n", len(diameter.CCAs))
