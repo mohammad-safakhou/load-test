@@ -52,6 +52,7 @@ func (m *account) Run() {
 		err := m.client.InitData(m.accountID, m.sessionData)
 		if err != nil {
 			log.Errorf("init data err: %v", err)
+			return
 		}
 
 		//time.Sleep(10 * time.Second)
@@ -61,12 +62,14 @@ func (m *account) Run() {
 			err = m.client.UpdateData(m.accountID, m.sessionData)
 			if err != nil {
 				log.Errorf("update data err: %v", err)
+				return
 			}
 		}
 
 		err = m.client.TerminateData(m.accountID, m.sessionData)
 		if err != nil {
 			log.Errorf("terminate data err: %v", err)
+			return
 		}
 	}()
 	//
