@@ -5,6 +5,7 @@ import (
 	"github.com/MHG14/go-diameter/v4/diam"
 	log "github.com/sirupsen/logrus"
 	"load-test/models"
+	"sync"
 	"time"
 )
 
@@ -29,13 +30,15 @@ type DiameterClient struct {
 	timeout time.Duration
 	conn    diam.Conn
 
-	hopIDs map[uint32]chan *diam.Message
+	hopIDs *sync.Map
 	//mux  *sm.StateMachine
 }
 
 func (d *DiameterClient) Send(message *diam.Message, accountID models.AccountID) error {
 	hopID := message.Header.HopByHopID
-	d.hopIDs[hopID] = make(chan *diam.Message)
+	ch := make(chan *diam.Message)
+
+	d.hopIDs.Store(hopID, ch)
 
 	_, err := message.WriteToStream(d.conn, uint(accountID.ID()))
 	if err != nil {
@@ -46,12 +49,13 @@ func (d *DiameterClient) Send(message *diam.Message, accountID models.AccountID)
 
 	// Wait for Response
 	select {
-	case resp := <-d.hopIDs[hopID]:
+	case resp := <-ch:
 		_ = resp
-		delete(d.hopIDs, hopID)
+		d.hopIDs.Delete(hopID)
 
 		return nil
 	case <-timeout:
+		d.hopIDs.Delete(hopID)
 		log.Errorf("Timeout happened on accountID: %s", accountID.String())
 		return errors.New("response timeout")
 	}
@@ -105,7 +109,7 @@ func (d *DiameterClient) TerminateVoiceCalled(accountID0, accountID1 models.Acco
 	return d.Send(BuildVoiceCalledTerminateSessionCCR(sessionID, accountID0.String(), accountID1.String()), accountID0)
 }
 
-func NewDiameterClient(conn diam.Conn, hopIDs map[uint32]chan *diam.Message) Client {
+func NewDiameterClient(conn diam.Conn, hopIDs *sync.Map) Client {
 	return &DiameterClient{
 		timeout: 5 * time.Second,
 		conn:    conn,

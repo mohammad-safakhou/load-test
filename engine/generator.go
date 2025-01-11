@@ -29,7 +29,7 @@ func worker(task chan models.AccountID, wg *sync.WaitGroup, numberOfAccounts int
 
 func Start(numberOfAccounts int) {
 	var err error
-	hopIDs := make(map[uint32]chan *diam.Message)
+	hopIDs := new(sync.Map)
 	conn, err = diameter.NewConnection(hopIDs)
 	if err != nil {
 		panic(err)

@@ -8,10 +8,11 @@ import (
 	"github.com/MHG14/go-diameter/v4/diam/sm"
 	log "github.com/sirupsen/logrus"
 	"net"
+	"sync"
 	"time"
 )
 
-func NewConnection(hopIDs map[uint32]chan *diam.Message) (diam.Conn, error) {
+func NewConnection(hopIDs *sync.Map) (diam.Conn, error) {
 	addr := "192.168.20.244:3868"
 	ssl := false
 	host := "client"
@@ -88,14 +89,15 @@ func handleCCA() diam.HandlerFunc {
 	}
 }
 
-func handleResponse(hopIds map[uint32]chan *diam.Message) diam.HandlerFunc {
+func handleResponse(hopIds *sync.Map) diam.HandlerFunc {
 	return func(_ diam.Conn, m *diam.Message) {
 		hopByHopID := m.Header.HopByHopID
-		v, exists := hopIds[hopByHopID]
-		if !exists {
+		val, ok := hopIds.Load(hopByHopID)
+		if !ok {
 			log.Errorf("Received unexpected response with Hop-by-Hop ID %d\n", hopByHopID)
-		} else {
-			v <- m
+			return
 		}
+		ch := val.(chan *diam.Message)
+		ch <- m
 	}
 }
