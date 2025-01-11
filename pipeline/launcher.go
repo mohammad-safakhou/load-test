@@ -5,7 +5,7 @@ import (
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 	"load-test/diameter"
-	"strconv"
+	"load-test/models"
 	"sync"
 	"time"
 )
@@ -18,8 +18,8 @@ type account struct {
 	updateIteration     int
 	sleepTimes          time.Duration
 	client              diameter.Client
-	accountID           string
-	otherID             string
+	accountID           models.AccountID
+	otherID             models.AccountID
 	sessionData         string
 	sessionVoiceCalling string
 	sessionVoiceCalled  string
@@ -32,19 +32,14 @@ func NewAccount(
 	numberOfAccounts int,
 	sleepTimes time.Duration,
 	client diameter.Client,
-	accountID string,
+	accountID models.AccountID,
 ) Launcher {
-	ai, _ := strconv.Atoi(accountID[2:])
-	temp := numberOfAccounts - ai + 1
-	if temp == ai {
-		temp += 1
-	}
 	return &account{
 		updateIteration: updateIteration,
 		sleepTimes:      sleepTimes,
 		client:          client,
 		accountID:       accountID,
-		otherID:         "00" + strconv.Itoa(temp),
+		otherID:         accountID.Other(numberOfAccounts),
 	}
 }
 

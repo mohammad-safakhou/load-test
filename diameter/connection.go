@@ -42,7 +42,7 @@ func NewConnection() (diam.Conn, error) {
 		Handler:            mux,
 		MaxRetransmits:     3,
 		RetransmitInterval: time.Second,
-		EnableWatchdog:     false,
+		EnableWatchdog:     true,
 		WatchdogInterval:   5 * time.Second,
 		WatchdogStream:     0,
 		SupportedVendorID:  nil,

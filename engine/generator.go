@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/MHG14/go-diameter/v4/diam"
 	"load-test/diameter"
+	"load-test/models"
 	"load-test/pipeline"
 	"math"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -19,7 +19,7 @@ const batchSize = 1
 const updateIterations = 2
 const sleepTimes = 1 * time.Second
 
-func worker(task chan string, wg *sync.WaitGroup, numberOfAccounts int) {
+func worker(task chan models.AccountID, wg *sync.WaitGroup, numberOfAccounts int) {
 	defer wg.Done()
 	for id := range task {
 		pipeline.NewAccount(updateIterations, numberOfAccounts, sleepTimes, client, id).Run()
@@ -35,7 +35,7 @@ func Start(numberOfAccounts int) {
 	}
 	client = diameter.NewDiameterClient(conn)
 
-	tasks := make(chan string, numberOfAccounts)
+	tasks := make(chan models.AccountID, numberOfAccounts)
 	wg := new(sync.WaitGroup)
 	wg.Add(numberOfAccounts)
 	for i := 0; i < numberOfAccounts; i++ {
@@ -44,13 +44,13 @@ func Start(numberOfAccounts int) {
 
 	fmt.Println("Workers are all up and running")
 
-	var accountIDs []string
+	var accountIDs []models.AccountID
 	for i := 1; i <= numberOfAccounts; i++ {
-		id := "00" + strconv.Itoa(i)
+		id := models.NewAccountID(i)
 		accountIDs = append(accountIDs, id)
 	}
 
-	accountsMap := make(map[int][]string)
+	accountsMap := make(map[int][]models.AccountID)
 
 	numOfWorkers := int(math.Ceil(float64(numberOfAccounts) / batchSize))
 
@@ -75,7 +75,7 @@ func Start(numberOfAccounts int) {
 	wg.Wait()
 }
 
-func pushWorker(tasks chan string, accountIDs []string, wg *sync.WaitGroup) {
+func pushWorker(tasks chan models.AccountID, accountIDs []models.AccountID, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for _, id := range accountIDs {
 		tasks <- id
