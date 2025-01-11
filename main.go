@@ -12,7 +12,7 @@ import (
 func main() {
 	diameter.CCAs = []string{}
 	numberOfAccounts := flag.Int("num", 1000000, "Number of accounts to create")
-	monitoring.Init(*numberOfAccounts)
+	//monitoring.Init(*numberOfAccounts)
 	engine.Start(*numberOfAccounts)
 	for {
 		time.Sleep(1 * time.Second)
