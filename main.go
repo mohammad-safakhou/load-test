@@ -12,6 +12,7 @@ import (
 func main() {
 	diameter.CCAs = []string{}
 	numberOfAccounts := flag.Int("num", 1000000, "Number of accounts to create")
+	fmt.Printf("Number of accounts to create: %d\n", *numberOfAccounts)
 	//monitoring.Init(*numberOfAccounts)
 	engine.Start(*numberOfAccounts)
 	for {
