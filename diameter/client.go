@@ -1,8 +1,6 @@
 package diameter
 
 import (
-	"errors"
-	"fmt"
 	"github.com/MHG14/go-diameter/v4/diam"
 	"load-test/models"
 	"sync"
@@ -61,7 +59,8 @@ func (d *DiameterClient) Send(message *diam.Message, accountID models.AccountID)
 		return nil
 	case <-timeout:
 		d.hopIDs.Delete(hopID)
-		return errors.New(fmt.Sprintf("Timeout happened on accountID: %s", accountID.String()))
+		//return errors.New(fmt.Sprintf("Timeout happened on accountID: %s", accountID.String()))
+		return nil
 	}
 }
 
