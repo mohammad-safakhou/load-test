@@ -13,4 +13,5 @@ func main() {
 	flag.Parse()
 	fmt.Printf("Number of accounts to create: %d\n", *numberOfAccounts)
 	engine.Start(*numberOfAccounts, *timeout)
+	time.Sleep(1000 * time.Second)
 }
