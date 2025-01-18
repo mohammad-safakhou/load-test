@@ -16,8 +16,10 @@ func BuildDataTerminateSessionCCR(
 	phoneNumber string,
 ) *diam.Message {
 	cfg := &Config{
-		MNC: "020",
-		MCC: "418",
+		MNC:             "020",
+		MCC:             "418",
+		UploadedBytes:   53362,
+		DownloadedBytes: 51904,
 	}
 
 	// 1) Create the CCR message: Command-Code=272 (Credit-Control), App-ID=4
@@ -185,9 +187,9 @@ func BuildDataTerminateSessionCCR(
 						// CC-Time=0
 						diam.NewAVP(avp.CCTime, avp.Mbit, 0, datatype.Unsigned32(0)),
 						// CC-Input-Octets => DownloadedBytes
-						diam.NewAVP(avp.CCInputOctets, avp.Mbit, 0, datatype.Unsigned64(cfg.DownloadedBytes)),
+						diam.NewAVP(avp.CCInputOctets, avp.Mbit, 0, datatype.Unsigned64(cfg.UploadedBytes)),
 						// CC-Output-Octets => UploadedBytes
-						diam.NewAVP(avp.CCOutputOctets, avp.Mbit, 0, datatype.Unsigned64(cfg.UploadedBytes)),
+						diam.NewAVP(avp.CCOutputOctets, avp.Mbit, 0, datatype.Unsigned64(cfg.DownloadedBytes)),
 					},
 				},
 			),

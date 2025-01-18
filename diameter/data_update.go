@@ -19,8 +19,10 @@ func BuildDataUpdateSessionCCR(
 	phoneNumber string,
 ) *diam.Message {
 	cfg := &Config{
-		MNC: "020",
-		MCC: "418",
+		MNC:             "020",
+		MCC:             "418",
+		UploadedBytes:   53362,
+		DownloadedBytes: 5190705,
 	}
 
 	// 3GPP Vendor ID
@@ -231,14 +233,14 @@ func BuildDataUpdateSessionCCR(
 							avp.CCInputOctets,
 							avp.Mbit,
 							0,
-							datatype.Unsigned64(cfg.DownloadedBytes),
+							datatype.Unsigned64(cfg.UploadedBytes),
 						),
 						// CC-Output-Octets=uploadedBytes
 						diam.NewAVP(
 							avp.CCOutputOctets,
 							avp.Mbit,
 							0,
-							datatype.Unsigned64(cfg.UploadedBytes),
+							datatype.Unsigned64(cfg.DownloadedBytes),
 						),
 					},
 				},
