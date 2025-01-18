@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-const RetryCount = 3
+const RetryCount = 100
 
 func NewConnection(hopIDs *sync.Map) (diam.Conn, error) {
 	addr := "192.168.20.244:3868"
