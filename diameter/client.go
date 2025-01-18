@@ -51,6 +51,7 @@ func (d *DiameterClient) Send(message *diam.Message, accountID models.AccountID)
 			if retry >= 3 {
 				panic(errors.Wrap(err, "unable to connect to diameter in send function"))
 			}
+			continue
 		}
 		break
 	}
