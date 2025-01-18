@@ -2,6 +2,7 @@ package diameter
 
 import (
 	"github.com/MHG14/go-diameter/v4/diam"
+	"github.com/pkg/errors"
 	"load-test/models"
 	"sync"
 	"time"
@@ -40,7 +41,7 @@ func (d *DiameterClient) Send(message *diam.Message, accountID models.AccountID)
 
 	conn, err := NewConnection(d.hopIDs)
 	if err != nil {
-		panic(err)
+		panic(errors.Wrap(err, "unable to connect to diameter in send function"))
 	}
 	defer conn.Close()
 	_, err = message.WriteTo(conn)

@@ -2,6 +2,7 @@ package engine
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"load-test/diameter"
 	"load-test/models"
 	"load-test/pipeline"
@@ -28,7 +29,7 @@ func Start(numberOfAccounts int, timeout time.Duration) {
 	hopIDs := new(sync.Map)
 	conn, err := diameter.NewConnection(hopIDs)
 	if err != nil {
-		panic(err)
+		panic(errors.Wrap(err, "unable to connect to diameter"))
 	}
 	client := diameter.NewDiameterClient(conn, hopIDs, timeout)
 
