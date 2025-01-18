@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+const RetryCount = 3
+
 func NewConnection(hopIDs *sync.Map) (diam.Conn, error) {
 	addr := "192.168.20.244:3868"
 	ssl := false
@@ -58,7 +60,19 @@ func NewConnection(hopIDs *sync.Map) (diam.Conn, error) {
 		},
 		VendorSpecificApplicationID: nil,
 	}
-	return dial(cli, addr, certFile, keyFile, ssl, networkType)
+
+	retry := 0
+Retry:
+	conn, err := dial(cli, addr, certFile, keyFile, ssl, networkType)
+	if err != nil {
+		retry += 1
+		if retry < RetryCount {
+			goto Retry
+		} else {
+			return nil, err
+		}
+	}
+	return conn, nil
 }
 
 func dial(cli *sm.Client, addr, cert, key string, ssl bool, networkType string) (diam.Conn, error) {
